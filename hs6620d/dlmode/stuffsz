@@ -1,0 +1,161 @@
+
+    #---- that's all boring ----#
+
+    # send a command
+    #packet_send(ser, b'\x90\x00\x04', 2)
+    #print(packet_recv(ser))
+
+    # get flash status (flash cmd 0x05)
+    #packet_send(ser, b'\x91', 2)
+    #print(packet_recv(ser))
+
+    # set flash status (flash cmd 0x01)
+    #packet_send(ser, b'\x92\x00\x00', 2)
+    #print(packet_recv(ser))
+
+    # erase flash sector (flash cmd 0x20)
+    #packet_send(ser, b'\x93\x00\x00\x00\x00', 2)
+    #print(packet_recv(ser))
+
+    # program flash (flash cmd 0x02)
+    #packet_send(ser, b'\x94\x00\x00\x00\x00\x00\x00\x00\x10!!konata_izmui!!', 2)
+    #print(packet_recv(ser))
+
+    #----
+
+    # enable write - flash cmd 0x06
+    #packet_send(ser, b'\x90\x00\x06', 2)
+    #print(packet_recv(ser))
+
+    # erase whole chip - flash cmd 0x60
+    #packet_send(ser, b'\x90\x00\x60', 2)
+    #print(packet_recv(ser))
+
+    # get flash status (flash cmd 0x05)
+    #packet_send(ser, b'\x91', 2)
+    #print(packet_recv(ser))
+
+    #----- that's a lot more interesting -----#
+    '''
+    # read8
+    packet_send(ser, b'\x0d\x08\x20\x00\x00\x34', 2)
+    print(packet_recv(ser))
+
+    # read16
+    packet_send(ser, b'\x0d\x10\x20\x00\x00\x34', 2)
+    print(packet_recv(ser))
+
+    # read32
+    packet_send(ser, b'\x0d\x20\x20\x00\x00\x34', 2)
+    print(packet_recv(ser))
+
+    # write8
+    packet_send(ser, b'\x0e\x08\x20\x00\x00\x10\x00\x00\x00\x55', 2)
+    print(packet_recv(ser))
+
+    # write16
+    packet_send(ser, b'\x0e\x10\x20\x00\x00\x14\x00\x00\x55\xaa', 2)
+    print(packet_recv(ser))
+
+    # write32
+    packet_send(ser, b'\x0e\x20\x20\x00\x00\x18\x55\xaa\xde\xad', 2)
+    print(packet_recv(ser))
+
+    # read32
+    packet_send(ser, b'\x0d\x20\x20\x00\x00\x10', 2)
+    print(packet_recv(ser))
+
+    # read32
+    packet_send(ser, b'\x0d\x20\x20\x00\x00\x14', 2)
+    print(packet_recv(ser))
+
+    # read32
+    packet_send(ser, b'\x0d\x20\x20\x00\x00\x18', 2)
+    print(packet_recv(ser))
+    '''
+
+    #-------------------------------------------------------------
+
+
+    # enable flash write
+    packet_send(ser, b'\x90\x00\x06', 2)
+    print(packet_recv(ser))
+
+    # erase whole flash
+    packet_send(ser, b'\x90\x00\xC7', 2)
+    print(packet_recv(ser))
+
+    # get flash status
+    for i in range(100):
+        packet_send(ser, b'\x91', 2)
+        print(packet_recv(ser))
+        time.sleep(.1)
+
+    exit()
+
+    # load the code into SRAM
+    with open('hai/BarusaMikosu.bin', 'rb') as f:
+        a = 0x20000000
+        while True:
+            rd = f.read(4)
+            if len(rd) < 1: break
+            write32(a, int.from_bytes(rd, 'little'))
+            a += len(rd)
+
+    # reset into SRAM mapping
+    wsmask32(0x400e003c, 5, 1, 1)
+    wmask32(0x400e003c, 0x1f, 0x06)
+
+    exit()
+
+    wsmask32(0x40000084, 24, 0xff, 0x00) # 7  -> 21 - 
+    wsmask32(0x40000088,  0, 0xff, 0x00) # 8  -> 1d - 
+    wsmask32(0x40000088, 16, 0xff, 0x00) # 10 -> 19 - SFLASH_MOSI
+    wsmask32(0x4000008C,  0, 0xff, 0x00) # 12 -> 20 - SFLASH_SCK
+
+    def gpio_set_af(pin, af):
+        wsmask32(0x40000000 + 0x80 + ((pin // 4) * 4), (pin % 4) * 8, 0xff, af)
+
+    def gpio_thingy(pmask, pset): #isn't that pullup/pulldown?
+        if pset == 0:
+            wmask32(0x400E0030, pmask, 0)
+            wmask32(0x400E0034, pmask, 0)
+            wmask32(0x400E0038, pmask, 0)
+        elif pset == 1:
+            wmask32(0x400E0030, pmask, 0)
+            wmask32(0x400E0034, pmask, ~0)
+            wmask32(0x400E0038, pmask, 0)
+        elif pset == 2:
+            wmask32(0x400E0030, pmask, 0)
+            wmask32(0x400E0034, pmask, 0)
+            wmask32(0x400E0038, pmask, ~0)
+
+    gpio_thingy(1<<7, 1)
+    gpio_thingy(1<<8, 2)
+    gpio_thingy(1<<9, 1)
+    gpio_thingy(1<<11, 1)
+
+    gpio_set_af( 7, 0x21) # 21 -> 
+    gpio_set_af( 8, 0x1d) # 1d -> 
+    gpio_set_af( 9, 0x1e) # 1e -> 
+    gpio_set_af(10, 0x19) # 19 -> MOSI
+    gpio_set_af(11, 0x1f) # 1f -> 
+    gpio_set_af(12, 0x20) # 20 -> SCK
+
+
+    with open('flash2.bin', 'wb') as f:
+        for addr in range(0x0000, 0x100000, 0x100):
+            print('%08x' % addr)
+
+            write32(0x50800010, (0x3b<<24)|addr)
+            write32(0x50800020, 0x20000000)
+            write32(0x5080000C, (0x100<<16)|((32+8)<<8)|(1<<4)|1)
+
+            while not (read32(0x50800004) & 1): pass
+            write32(0x50800004, 1)
+
+            print('%08x' % read32(0x20000000))
+
+            for i in range(0, 0x100, 4):
+                f.write(read32(0x20000000+i).to_bytes(4, 'little'))
+
