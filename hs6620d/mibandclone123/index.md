@@ -1,6 +1,7 @@
 # A Mi band clone or something like that
 
-Some fitness bracelet (or how do you call it, a smartwatch, fitness watch?) that came branded as some Mi Band but in fact it's not.
+Some fitness bracelet (or how do you call it, a smartwatch, fitness watch?)
+that came branded as some Mi Band (4?) but in fact it's not.
 
 I thought it was based on an **nRF52832** MCU like the watch i had previously (can't remember what it was),
 but it turned out to be based on a **HS6620D** instead.
@@ -49,6 +50,6 @@ No photos yet
 |  25 |                                    |
 |  26 | ext SPI flash CS                   |
 |  27 |                                    |
-|  28 | Accelerometer SDA                  |
-|  29 | probably accelerometer             |
+|  28 | Accelerometer IRQ?                 |
+|  29 | Accelerometer SDA                  |
 |  30 |                                    |
