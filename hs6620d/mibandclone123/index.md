@@ -8,9 +8,9 @@ but it turned out to be based on a **HS6620D** instead.
 Board label: **B-MI3P_V10**
 
 - HS6620D MCU
-- 160x80 vertical IPS LCD (whatever it is)
+- 80x160 IPS LCD (whatever it is)
 - Some heart rate sensor
-- Some accelerometer
+- Some accelerometer (reg0F "who am i" == 0x11, i2c addr 0x19)
 - There could be a SPI flash i guess
 
 ## Photos
@@ -24,7 +24,7 @@ No photos yet
 |   0 | SWCLK **exposed as CLK**           |
 |   1 | SWDIO **exposed as DIO**           |
 |   2 |                                    |
-|   3 | Vibration motor (i'm afraid that using term *vibrator* might lead to misconfusion, you know...) |
+|   3 | Vibration motor enable             |
 |   4 | Download mode trigger **exposed as DL** |
 |   5 | UART1 TX **exposed as TX**         |
 |   6 | UART1 RX **exposed as RX**         |
@@ -37,7 +37,7 @@ No photos yet
 |  13 | LCD CS (select)                    |
 |  14 | ext SPI flash SCK                  |
 |  15 | ext SPI flash HOLD+VDD -- power is supplied directly from a pin?? |
-|  16 | probably accelerometer             |
+|  16 | Accelerometer SCL                  |
 |  17 |                                    |
 |  18 | LCD SDA (data)                     |
 |  19 | LCD backlight enable               |
@@ -49,6 +49,6 @@ No photos yet
 |  25 |                                    |
 |  26 | ext SPI flash CS                   |
 |  27 |                                    |
-|  28 | probably accelerometer             |
+|  28 | Accelerometer SDA                  |
 |  29 | probably accelerometer             |
 |  30 |                                    |
