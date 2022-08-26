@@ -15,10 +15,8 @@ int ugetc(void) {
 
 /* Startup Function */
 __attribute__((noreturn)) void _start(void) {
-	/* clear BSS & copy DATA */ {
 	extern char _sbss, _ebss;
 	memset(&_sbss, 0, &_ebss - &_sbss);
-	}
 
 	for (;;) {
 		for (char *c = "barusa mikosu!\n"; *c; c++)
