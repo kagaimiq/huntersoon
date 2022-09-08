@@ -1,6 +1,10 @@
 # SFLASH
 
-SFLASH (Serial FLASH)
+SFLASH (Serial FLASH) is an dedicated controller for an internal/external SPI flashes,
+which primarily built upon DMA transfers, and might even map the flash into memory!
+
+It supports the DSPI and QSPI modes, which are selected automatically depending
+on the command you send! That's not what your average SPI controller does...
 
 ## Registers
 
@@ -20,14 +24,14 @@ reg0C: command
 reg10: command data0 reg
 reg14: command data1 reg
     Command bits
-    - Each reg contains the bits that is sent MSB-first
-      i.e. value of 0xacebecaf, with bit count = 32 will be sent out as [ac eb ec af],
-      and the same thing with bit count = 20 will be sent out as [ac eb eX]
+    the MSB (bit31) of the whole reg is sent first.
+    e.g. 0xACEBECA0,0xFECABECA 
+       with bit count = 48 will be sent as ACEBECA0FECA,
+            bit count = 24 will be sent as ACEBEC.
 
 reg18: read0 reg
 reg1C: read1 reg
-    Data received while sending command data
-    - Same deal as in command data regs
+    Received data bits (which were received upon sending command bits)
 
 reg20: address reg
     b2~b31 = DMA address
