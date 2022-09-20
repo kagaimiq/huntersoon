@@ -35,7 +35,7 @@ SECTIONS {
 	} >RAM
 
 	.stack : {
-		. = . + 2048;
+		. = . + 4096;
 		. = ALIGN(8);
 		__system_sp = .;
 	} >RAM

@@ -2,10 +2,13 @@ TARGET=BarusaMikosu
 
 OBJS = \
 	sperd.o \
+	xprintf.o
 
 CFLAGS  = -mcpu=cortex-m3 -O2 -Werror -DF_CPU=48000000 -mthumb
 ASFLAGS = -mcpu=cortex-m3
 LDFLAGS = -mcpu=cortex-m3 -Tlink.ld -nostartfiles
+
+#LDFLAGS += -Tmaskrom_stuff.ld
 
 CROSS_COMPILE = arm-none-eabi-
 CC      = $(CROSS_COMPILE)gcc
