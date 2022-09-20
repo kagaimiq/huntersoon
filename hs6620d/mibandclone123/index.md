@@ -12,7 +12,7 @@ Board label: **B-MI3P_V10**
 - 80x160 IPS LCD (whatever it is)
 - Some heart rate sensor
 - Some accelerometer (reg0F "who am i" == 0x11, i2c addr 0x19)
-- There could be a SPI flash i guess
+- There could be an SPI flash
 
 ## Photos
 
@@ -20,36 +20,36 @@ No photos yet
 
 ## GPIO usage
 
-|  #  |              Usage                 |
-|-----|------------------------------------|
-|   0 | SWCLK **exposed as CLK**           |
-|   1 | SWDIO **exposed as DIO**           |
-|   2 |                                    |
-|   3 | Vibration motor enable             |
-|   4 | Download mode trigger **exposed as DL** |
-|   5 | UART1 TX **exposed as TX**         |
-|   6 | UART1 RX **exposed as RX**         |
-|   7 | Heart rate something (pin 2)       |
-|   8 | ext SPI flash MISO                 |
-|   9 | ext SPI flash WP                   |
-|  10 | ext SPI flash MOSI                 |
-|  11 | LCD RS (command/data)              |
-|  12 | LCD RES (reset)                    |
-|  13 | LCD CS (select)                    |
-|  14 | ext SPI flash SCK                  |
-|  15 | ext SPI flash HOLD+VDD -- power is supplied directly from a pin?? |
-|  16 | Accelerometer SCL                  |
-|  17 |                                    |
-|  18 | LCD SDA (data)                     |
-|  19 | LCD backlight enable               |
-|  20 |                                    |
-|  21 | Touch button                       |
-|  22 | LCD SCL (clock)                    |
-|  23 | Heart rate something (pin 3)       |
-|  24 | Heart rate LED (pin 4)             |
-|  25 |                                    |
-|  26 | ext SPI flash CS                   |
-|  27 |                                    |
-|  28 | Accelerometer IRQ?                 |
-|  29 | Accelerometer SDA                  |
-|  30 |                                    |
+|  #  |            Usage             |        Note        |
+|-----|------------------------------|--------------------|
+|   0 | SWCLK                        | **exposed as CLK** |
+|   1 | SWDIO                        | **exposed as DIO** |
+|   2 |                              |                    |
+|   3 | Vibration motor enable       | active high        |
+|   4 | Download mode trigger        | **exposed as DL**  |
+|   5 | UART1 TX                     | **exposed as TX**  |
+|   6 | UART1 RX                     | **exposed as RX**  |
+|   7 | Heart rate something (pin 2) |                    |
+|   8 | ext SPI flash MISO           |                    |
+|   9 | ext SPI flash WP             |                    |
+|  10 | ext SPI flash MOSI           |                    |
+|  11 | LCD RS                       |                    |
+|  12 | LCD RES                      |                    |
+|  13 | LCD CS                       |                    |
+|  14 | ext SPI flash SCK            |                    |
+|  15 | ext SPI flash HOLD+VDD       | power is supplied directly from a pin?? |
+|  16 | Accelerometer SCL            |                    |
+|  17 |                              |                    |
+|  18 | LCD SDA                      |                    |
+|  19 | LCD backlight enable         | active high        |
+|  20 |                              |                    |
+|  21 | Touch button                 | active low         |
+|  22 | LCD SCL                      |                    |
+|  23 | Heart rate something (pin 3) |                    |
+|  24 | Heart rate LED (pin 4)       | active low         |
+|  25 |                              |                    |
+|  26 | ext SPI flash CS             |                    |
+|  27 |                              |                    |
+|  28 | Accelerometer IRQ            |                    |
+|  29 | Accelerometer SDA            |                    |
+|  30 |                              |                    |
