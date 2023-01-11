@@ -2,7 +2,7 @@ import serial, time
 from hsproto import HunterSunDL
 
 baudrate = 115200
-port = '/dev/ttyUSB0'
+port = '/dev/ttyS1'
 
 with HunterSunDL(serial.Serial(port, baudrate, timeout=.1)) as hsdl:
     def read8(addr):
@@ -27,6 +27,90 @@ with HunterSunDL(serial.Serial(port, baudrate, timeout=.1)) as hsdl:
         return (read32(addr) >> shift) & mask
 
     #------------
+
+    def readbytes(addr, len):
+        data = b''
+
+        while len > 0:
+            if (len >= 4) and (addr & 3 == 0):
+                v = read32(addr)
+                n = 4
+
+            elif (len >= 2) and (addr & 1 == 0):
+                v = read16(addr)
+                n = 2
+
+            else:
+                v = read8(addr)
+                n = 1
+
+            data += v.to_bytes(n, 'little')
+            len -= n
+            addr += n
+
+        return data
+
+    SFLASH = 0x50800000
+
+    write32(SFLASH+0x28, 0x00000008)
+    write32(SFLASH+0x2C, 0x0a0a0a00)
+
+    for i in range(0, 0x80, 4):
+        print('%04x: %08x' % (i, read32(SFLASH + i)))
+
+
+    '''
+    #---- write en
+
+    write32(SFLASH+0x10, 0x06000000)
+    write32(SFLASH+0x0C, (8<<8) | (3<<0))
+
+    #---- program
+
+    write32(0x20000000, 0x4d495a55)
+    write32(0x20000004, 0xdeadbeef)
+    write32(SFLASH+0x20, 0x20000000)
+
+    write32(SFLASH+0x10, 0x020f0020)
+    write32(SFLASH+0x0C, (8<<16) | (32<<8) | (0<<4) | (2<<0))
+
+    #---- read
+
+    write32(SFLASH+0x20, 0x20000000)
+    write32(SFLASH+0x10, 0x030f0000)
+    write32(SFLASH+0x14, 0x00000000)
+    write32(SFLASH+0x0C, (256<<16) | (32<<8) | (0<<4) | (1<<0) | (1<<6))
+
+    print('%08x%08x' % (read32(SFLASH+0x18), read32(SFLASH+0x1C)))
+
+    print(readbytes(0x20000000, 0x100))
+
+    write32(SFLASH+0x20, 0x20000000)
+    write32(SFLASH+0x0C, (256<<16) | (1<<0))
+
+    print(readbytes(0x20000000, 0x100))
+    '''
+
+    # load the code into SRAM
+    with open('hai/BarusaMikosu.bin', 'rb') as f:
+        a = 0x20000000
+        while True:
+            if (a & 0xff) == 0: print("%08x" % a)
+
+            rd = f.read(4)
+            if len(rd) < 1: break
+            write32(a, int.from_bytes(rd, 'little'))
+            a += len(rd)
+
+    try:
+        # reset into SRAM mapping
+        wsmask32(0x400e003c, 5, 1, 1)
+        wmask32(0x400e003c, 0x1f, 0x06)
+    except:
+        pass
+
+    exit()
+
 
     # 0x04 -> CPU
     write32(0x40001000+0x08, 0xa)
@@ -103,29 +187,6 @@ with HunterSunDL(serial.Serial(port, baudrate, timeout=.1)) as hsdl:
     GPIO_SetValue(24, False)
     time.sleep(.25)
     GPIO_SetValue(24, True)
-
-
-    # load the code into SRAM
-    with open('hai/BarusaMikosu.bin', 'rb') as f:
-        a = 0x20000000
-        while True:
-            if (a & 0xff) == 0: print("%08x" % a)
-
-            rd = f.read(4)
-            if len(rd) < 1: break
-            write32(a, int.from_bytes(rd, 'little'))
-            a += len(rd)
-
-    try:
-        # reset into SRAM mapping
-        wsmask32(0x400e003c, 5, 1, 1)
-        wmask32(0x400e003c, 0x1f, 0x06)
-    except:
-        pass
-
-    exit()
-
-
 
     #--------------
 

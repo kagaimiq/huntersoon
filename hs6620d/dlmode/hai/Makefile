@@ -1,8 +1,7 @@
 TARGET=BarusaMikosu
 
 OBJS = \
-	sperd.o \
-	xprintf.o
+	serprogthing.o
 
 CFLAGS  = -mcpu=cortex-m3 -O2 -Werror -DF_CPU=48000000 -mthumb
 ASFLAGS = -mcpu=cortex-m3

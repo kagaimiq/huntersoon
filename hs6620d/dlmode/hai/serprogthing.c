@@ -3,6 +3,8 @@
 
 #define REG32(a)	(*(volatile uint32_t *)(a))
 
+#define SFLASH_base		0x50800000
+
 void uputc(int c) {
 	while ((REG32(0x40040014) & 0x60) != 0x60);
 	REG32(0x40040000) = c;
@@ -100,54 +102,45 @@ __attribute__((noreturn)) void _start(void) {
 				int slen = ugetc()|(ugetc()<<8)|(ugetc()<<16);
 				int rlen = ugetc()|(ugetc()<<8)|(ugetc()<<16);
 
-				/*while (slen--) ugetc();
+				while (slen > 0) {
+					int n = slen; if (n > 8) n = 8;
+					slen -= n;
+
+					uint8_t data[8];
+					for (int i = 0; i < n; i++) data[i] = ugetc();
+
+					REG32(SFLASH_base + 0x10) = (data[0]<<24)|(data[1]<<16)|(data[2]<<8)|data[3];
+					REG32(SFLASH_base + 0x14) = (data[4]<<24)|(data[5]<<16)|(data[6]<<8)|data[7];
+
+					REG32(SFLASH_base + 0x0C) =
+						((n * 8) << 8) |		// bit count
+						(((slen || rlen) ? 1:0)<<6) |	// keep the CS low if we still have something to send or receive
+						(0<<4) |			// CS = 0
+						(1<<0);				// 1 = write (but really doesn't matter, as we aren't using DMA)
+
+					while (!(REG32(SFLASH_base + 0x04) & (1<<0)));
+					REG32(SFLASH_base + 0x04) = (1<<0); // clear int
+				}
+
 				uputc(0x06);
-				while (rlen--) uputc(0x00);*/
 
-				static volatile uint8_t data[0x10000]; // super unoptimized
+				REG32(SFLASH_base + 0x10) = 0xffffffff;
+				REG32(SFLASH_base + 0x14) = 0xffffffff;
 
-				#if 0
-				if ((slen + rlen) <= 8) {
-					/* send&receive fully fits in the command regs */
+				while (rlen > 0) {
+					int n = rlen; if (n > 1) n = 1;
+					rlen -= n;
 
-					for (int i = 0; i < slen; i++) data[i] = ugetc();
+					REG32(SFLASH_base + 0x0C) =
+						((n * 8) << 8) |	// bit count
+						((rlen ? 1:0)<<6) |	// keep the CS low if we still have something to receive
+						(0<<4) |		// CS = 0
+						(1<<0);			// 1 = write (but really doesn't matter, as we aren't using DMA)
 
-					REG32(0x50800010) = (data[0]<<24)|(data[1]<<16)|(data[2]<<8)|data[3];
-					REG32(0x50800014) = (data[4]<<24)|(data[5]<<16)|(data[6]<<8)|data[7];
+					while (!(REG32(SFLASH_base + 0x04) & (1<<0)));
+					REG32(SFLASH_base + 0x04) = (1<<0); // clear int
 
-					REG32(0x5080000C) = (((slen+rlen)*8)<<8)|(0<<4)|1;
-					while (!(REG32(0x50800004) & 1)); REG32(0x50800004) = 1;
-
-					for (int i = 0; i < 8; i++) // voodoo magic !!!
-						data[i] = REG32(0x50800018 + ((i >> 2) * 4)) >> (8 * (3 - (i & 3)));
-
-					uputc(0x06);
-					for (int i = 0; i < rlen; i++) uputc(data[slen+i]);
-				} else
-				#endif
-				if ((slen <= 8) && (rlen <= 0xffff)) {
-					/* Sends a command, receives a data block */
-
-					for (int i = 0; i < slen; i++) data[i] = ugetc();
-
-					REG32(0x50800010) = (data[0]<<24)|(data[1]<<16)|(data[2]<<8)|data[3];
-					REG32(0x50800014) = (data[4]<<24)|(data[5]<<16)|(data[6]<<8)|data[7];
-					REG32(0x50800020) = (uint32_t)data;
-					REG32(0x5080000C) = (((rlen+0xf)&~0xf)<<16)|((slen*8)<<8)|(0<<4)|1;
-					while (!(REG32(0x50800004) & 1)); REG32(0x50800004) = 1;
-
-					uputc(0x06);
-					for (int i = 0; i < rlen; i++) uputc(data[i]);
-
-				} else if ((slen <= (0xffff+8)) && (rlen == 0)) {
-					/* Sends a command and a data block */
-
-					while (slen--) ugetc();
-					uputc(0x15);
-				} else {
-					/* Nah, that's not possible then */
-					while (slen--) ugetc();
-					uputc(0x15);
+					uputc(REG32(SFLASH_base + 0x18));
 				}
 			}
 			break;

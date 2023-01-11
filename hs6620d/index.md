@@ -4,26 +4,30 @@
 
 ## Specs
 
-- ARM Cortex-M3 @ 48 MHz
-
+- CPU
+  - ARM Cortex-M3
+  - Clocks up to 48 MHz
+  - Serial wire debug (SWD) available
 - Memory
   - 128 KiB SRAM
-  - 256 KiB [ROM](rom.md)
-  - 1 MiB SPI Flash (internal)
-
+  - 256 KiB ROM
+  - 1 MiB internal SPI Flash
 - Peripherals
   - 2x GPIO (31 pins total)
   - 2x UART
   - 2x SPI
   - 1x I2C
   - 1x SFLASH
+- Wireless
+  - Bluetooth 4.2 Low Energy
+  - 2.4 GHz proprietary modem
 
 ## Memory map
 
 |  Address   | Size |     Usage      |
 |------------|------|----------------|
 | 0x00000000 | 512k | ROM/SRAM alias |
-| 0x08000000 | 256k | [ROM](rom.md)  |
+| 0x08000000 | 256k | ROM            |
 | 0x10000000 | 128k | SRAM alias     |
 | 0x20000000 | 128k | SRAM           |
 
@@ -33,16 +37,16 @@
 |------------|-----|-------------------------|------------------|
 | 0x40000000 |  ?  | SYS                     |                  |
 | 0x40001000 |  ?  | CLK                     |                  |
-| 0x40030000 | APB | UART0                   | Designware IP    |
-| 0x40040000 | APB | UART1                   | Designware IP    |
+| 0x40030000 | APB | UART0                   | Designware UART  |
+| 0x40040000 | APB | UART1                   | Designware UART  |
 | 0x40050000 | APB | SPI0                    |                  |
 | 0x40060000 | APB | SPI1                    |                  |
-| 0x40070000 | APB | I2C                     | Designware IP    |
+| 0x40070000 | APB | I2C                     | Designware I2C   |
 | 0x400A0000 | APB | hs6600 trx              |                  |
 | 0x400C0000 | APB | TIMER0                  |                  |
 | 0x400C0100 | APB | TIMER1                  |                  |
 | 0x400C0200 | APB | TIMER2                  |                  |
-| 0x400D0000 | APB | WDT                     | Designware IP    |
+| 0x400D0000 | APB | WDT                     | Designware WDT   |
 | 0x400E0000 |  ?  | PMU                     |                  |
 | 0x400F0000 | APB | RTC                     |                  |
 | 0x40120000 | AHB? | GPIO0 (pins 0..15)     | pins 0-15        |
@@ -124,19 +128,3 @@
 - 0x3d - ?? SWD?
 
 **Note**: pins 9 and 15..30 have the function no. XORed by 0x03
-
-----
-
-## Some links
-
-A list of some liks that is related to the HS6620D, with key points pointed out.
-
-- [rbaron/HS6620D-smartwatch-reveng](https://github.com/rbaron/HS6620D-smartwatch-reveng)
-  - Some more resources
-  - SWD bits
-  - A ROM dump
-
-- [fbiego/dt78](https://github.com/fbiego/dt78)
-  - The Datasheet
-  - Stock fw's BLE protocol (WearFit2 protocol) (+ ESP32 server/client implementation)
-  - The HS6620D is not touched at all, for a custom firmware the ESP32 is used instead.
